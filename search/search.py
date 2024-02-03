@@ -19,6 +19,26 @@ Pacman agents (in searchAgents.py).
 
 import util
 
+class Node:
+
+    def __init__(self, state, parent, action, pathCost):
+        self.state = state
+        self.parent = parent
+        self.action = action
+        self.pathCost = pathCost
+
+    def returnState(self):
+        return self.state
+
+    def returnParent(self):
+        return self.parent
+    
+    def returnAction(self):
+        return self.action
+    
+    def returnPathCost(self):
+        return self.pathCost
+
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -87,24 +107,38 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
 
-    currNode = problem.getStartState()
+    # currNode = Node(problem.getStartState())
+    if problem.isGoalState(currNode):
+        return visitedNodes
     fringe = util.Stack()
-    for triple in problem.getSuccessors(currNode):
-        fringe.push(triple[0])
-    visitedNodes = []
-    visitedNodes.append(currNode)
+    fringe.push(currNode)
+    visitedNodes = [currNode]
+    # for triple in problem.getSuccessors(currNode):
+    #     fringe.push(triple[0])
+    # actionsList = []
+    # visitedNodes.append(currNode)
 
     while not fringe.isEmpty():
         currNode = fringe.pop()
-        if problem.isGoalState(currNode):
-            return visitedNodes
-        for triple in problem.getSuccessors(currNode):
-            successor = triple[0]
-            if successor in visitedNodes:
-                
+        # for triple in problem.getSuccessors(currNode.returnState()):
+        #     successor = triple[0]
+        #     action = triple[1]
+        #     stepCost = triple[2]
+        #     actionsList.append[action]
+        #     if successor in visitedNodes or problem.getCostOfActions(actionsList) < visitedNodes:
+        #         visitedNodes.append(successor)
+        #         fringe.push(successor)
+        # actionsList = []
+
+def expand(problem, node):
+    state = node.returnState()
+    for triple in problem.getSuccessors(state):
+        nextState = triple[0]
+        action = triple[1]
+        stepCost = triple[2]
+        yield Node(nextState, node, action, stepCost)
 
 
-    util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
