@@ -107,28 +107,37 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
 
-    # currNode = Node(problem.getStartState())
-    if problem.isGoalState(currNode):
-        return visitedNodes
+    currNode = Node(problem.getStartState(), None, None, None)
+    actionList = []
+    if problem.isGoalState(currNode.returnState()):
+        return actionList
     fringe = util.Stack()
     fringe.push(currNode)
-    visitedNodes = [currNode]
-    # for triple in problem.getSuccessors(currNode):
-    #     fringe.push(triple[0])
-    # actionsList = []
-    # visitedNodes.append(currNode)
+    visitedStates = [currNode.returnState()]
 
     while not fringe.isEmpty():
         currNode = fringe.pop()
-        # for triple in problem.getSuccessors(currNode.returnState()):
-        #     successor = triple[0]
-        #     action = triple[1]
-        #     stepCost = triple[2]
-        #     actionsList.append[action]
-        #     if successor in visitedNodes or problem.getCostOfActions(actionsList) < visitedNodes:
-        #         visitedNodes.append(successor)
-        #         fringe.push(successor)
-        # actionsList = []
+        # print("Current Node's State: ", currNode.returnState())
+        for successor in expand(problem, currNode):
+            state = successor.returnState()
+            # print("Successor's State: ", state)
+            # print("Action to successor: ", successor.returnAction())
+            if problem.isGoalState(state):
+                node = successor
+                while node.returnParent() != None:
+                    actionList.insert(0, node.returnAction())
+                    node = node.returnParent()
+                # print("Goal State: ", state)
+                # print("actionList: ")
+                # # Print statement
+                # for action in actionList:
+                #     print(action)
+                return actionList
+
+            if state not in visitedStates:
+                visitedStates.append(state)
+                fringe.push(successor)
+    return None
 
 def expand(problem, node):
     state = node.returnState()
@@ -137,8 +146,6 @@ def expand(problem, node):
         action = triple[1]
         stepCost = triple[2]
         yield Node(nextState, node, action, stepCost)
-
-
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
