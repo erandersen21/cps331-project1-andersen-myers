@@ -106,7 +106,6 @@ def depthFirstSearch(problem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-
     currNode = Node(problem.getStartState(), None, None, None)
     actionList = []
     if problem.isGoalState(currNode.returnState()):
@@ -117,23 +116,14 @@ def depthFirstSearch(problem):
 
     while not fringe.isEmpty():
         currNode = fringe.pop()
-        # print("Current Node's State: ", currNode.returnState())
         for successor in expand(problem, currNode):
             state = successor.returnState()
-            # print("Successor's State: ", state)
-            # print("Action to successor: ", successor.returnAction())
             if problem.isGoalState(state):
                 node = successor
                 while node.returnParent() != None:
                     actionList.insert(0, node.returnAction())
                     node = node.returnParent()
-                # print("Goal State: ", state)
-                # print("actionList: ")
-                # # Print statement
-                # for action in actionList:
-                #     print(action)
                 return actionList
-
             if state not in visitedStates:
                 visitedStates.append(state)
                 fringe.push(successor)
@@ -144,18 +134,57 @@ def expand(problem, node):
     for triple in problem.getSuccessors(state):
         nextState = triple[0]
         action = triple[1]
-        stepCost = triple[2]
-        yield Node(nextState, node, action, stepCost)
+        pathCost = triple[2] + node.returnPathCost()
+        yield Node(nextState, node, action, pathCost)
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    currNode = Node(problem.getStartState(), None, None, None)
+    actionList = []
+    if problem.isGoalState(currNode.returnState()):
+        return actionList
+    fringe = util.Queue()
+    fringe.push(currNode)
+    visitedStates = [currNode.returnState()]
+
+    while not fringe.isEmpty():
+        currNode = fringe.pop()
+        for successor in expand(problem, currNode):
+            state = successor.returnState()
+            if problem.isGoalState(state):
+                node = successor
+                while node.returnParent() != None:
+                    actionList.insert(0, node.returnAction())
+                    node = node.returnParent()
+                return actionList
+            if state not in visitedStates:
+                visitedStates.append(state)
+                fringe.push(successor)
+    return None
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    currNode = Node(problem.getStartState(), None, None, 0)
+    actionList = []
+    if problem.isGoalState(currNode.returnState()):
+        return actionList
+    fringe = util.PriorityQueue()
+    fringe.push(currNode, 0)
+    visitedStates = {currNode.returnState(): currNode}
+
+    while not fringe.isEmpty():
+        currNode = fringe.pop()
+        if problem.isGoalState(currNode.returnState()):
+            while currNode.returnParent() != None:
+                actionList.insert(0, currNode.returnAction())
+                currNode = currNode.returnParent()
+            return actionList
+        for successor in expand(problem, currNode):
+            state = successor.returnState()
+            if state not in visitedStates or successor.returnPathCost() < visitedStates[state].returnPathCost():
+                visitedStates.update({successor.returnState(): currNode})
+                fringe.push(successor, successor.returnPathCost())
+    return None
 
 def nullHeuristic(state, problem=None):
     """
