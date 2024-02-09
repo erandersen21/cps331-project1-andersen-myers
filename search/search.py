@@ -18,6 +18,7 @@ Pacman agents (in searchAgents.py).
 """
 
 import util
+import searchAgents
 
 class Node:
 
@@ -139,7 +140,7 @@ def expand(problem, node):
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    currNode = Node(problem.getStartState(), None, None, None)
+    currNode = Node(problem.getStartState(), None, None, 0)
     actionList = []
     if problem.isGoalState(currNode.returnState()):
         return actionList
@@ -195,8 +196,27 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    currNode = Node(problem.getStartState(), None, None, 0)
+    actionList = []
+    if problem.isGoalState(currNode.returnState()):
+        return actionList
+    fringe = util.PriorityQueue()
+    fringe.push(currNode, searchAgents.manhattanHeuristic(currNode.returnState(), problem))
+    visitedStates = {currNode.returnState(): currNode}
+
+    while not fringe.isEmpty():
+        currNode = fringe.pop()
+        if problem.isGoalState(currNode.returnState()):
+            while currNode.returnParent() != None:
+                actionList.insert(0, currNode.returnAction())
+                currNode = currNode.returnParent()
+            return actionList
+        for successor in expand(problem, currNode):
+            state = successor.returnState()
+            if state not in visitedStates or successor.returnPathCost() < visitedStates[state].returnPathCost():
+                visitedStates.update({successor.returnState(): currNode})
+                fringe.push(successor, successor.returnPathCost() + searchAgents.manhattanHeuristic(successor.returnState(), problem))
+    return None
 
 
 # Abbreviations
