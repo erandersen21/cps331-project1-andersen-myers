@@ -107,26 +107,25 @@ def depthFirstSearch(problem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    currNode = Node(problem.getStartState(), None, None, None)
+    currNode = Node(problem.getStartState(), None, None, 0)
     actionList = []
     if problem.isGoalState(currNode.returnState()):
         return actionList
     fringe = util.Stack()
     fringe.push(currNode)
-    visitedStates = [currNode.returnState()]
+    visitedStates = []
 
     while not fringe.isEmpty():
         currNode = fringe.pop()
-        for successor in expand(problem, currNode):
-            state = successor.returnState()
+        state = currNode.returnState()
+        if state not in visitedStates:
+            visitedStates.append(state)
             if problem.isGoalState(state):
-                node = successor
-                while node.returnParent() != None:
-                    actionList.insert(0, node.returnAction())
-                    node = node.returnParent()
+                while currNode.returnParent() != None:
+                    actionList.insert(0, currNode.returnAction())
+                    currNode = currNode.returnParent()
                 return actionList
-            if state not in visitedStates:
-                visitedStates.append(state)
+            for successor in expand(problem, currNode):
                 fringe.push(successor)
     return None
 
@@ -167,23 +166,19 @@ def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     currNode = Node(problem.getStartState(), None, None, 0)
     actionList = []
-    if problem.isGoalState(currNode.returnState()):
-        return actionList
     fringe = util.PriorityQueue()
     fringe.push(currNode, 0)
-    visitedStates = {currNode.returnState(): currNode}
-
+    visitedStates = []
     while not fringe.isEmpty():
         currNode = fringe.pop()
-        if problem.isGoalState(currNode.returnState()):
-            while currNode.returnParent() != None:
-                actionList.insert(0, currNode.returnAction())
-                currNode = currNode.returnParent()
-            return actionList
-        for successor in expand(problem, currNode):
-            state = successor.returnState()
-            if state not in visitedStates or successor.returnPathCost() < visitedStates[state].returnPathCost():
-                visitedStates.update({successor.returnState(): currNode})
+        if currNode.returnState() not in visitedStates:
+            visitedStates.append(currNode.returnState())
+            if problem.isGoalState(currNode.returnState()):
+                while currNode.returnParent() != None:
+                    actionList.insert(0, currNode.returnAction())
+                    currNode = currNode.returnParent()
+                return actionList
+            for successor in expand(problem, currNode):
                 fringe.push(successor, successor.returnPathCost())
     return None
 
@@ -198,24 +193,20 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     currNode = Node(problem.getStartState(), None, None, 0)
     actionList = []
-    if problem.isGoalState(currNode.returnState()):
-        return actionList
     fringe = util.PriorityQueue()
-    fringe.push(currNode, searchAgents.manhattanHeuristic(currNode.returnState(), problem))
-    visitedStates = {currNode.returnState(): currNode}
-
+    fringe.push(currNode, heuristic(currNode.returnState(), problem))
+    visitedStates = []
     while not fringe.isEmpty():
         currNode = fringe.pop()
-        if problem.isGoalState(currNode.returnState()):
-            while currNode.returnParent() != None:
-                actionList.insert(0, currNode.returnAction())
-                currNode = currNode.returnParent()
-            return actionList
-        for successor in expand(problem, currNode):
-            state = successor.returnState()
-            if state not in visitedStates or successor.returnPathCost() < visitedStates[state].returnPathCost():
-                visitedStates.update({successor.returnState(): currNode})
-                fringe.push(successor, successor.returnPathCost() + searchAgents.manhattanHeuristic(successor.returnState(), problem))
+        if currNode.returnState() not in visitedStates:
+            visitedStates.append(currNode.returnState())
+            if problem.isGoalState(currNode.returnState()):
+                while currNode.returnParent() != None:
+                    actionList.insert(0, currNode.returnAction())
+                    currNode = currNode.returnParent()
+                return actionList
+            for successor in expand(problem, currNode):
+                fringe.push(successor, successor.returnPathCost() + heuristic(successor.returnState(), problem))
     return None
 
 
